@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const axios = axios.create({
+const api = axios.create({
   baseURL: process.meta.env.VITE_API_URL || "http://localhost:5173/",
   withCredentials: true
 })
@@ -18,7 +18,7 @@ export const errorHandler = async (fn) => {
 }
 
 
-export default axios
+export default api
 
 
 

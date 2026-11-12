@@ -121,7 +121,7 @@ export default function Sidebar() {
           </div>
 
           {/* Profile Details */}
-          <div className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-100 transition border border-transparent hover:border-slate-200 cursor-pointer">
+          <div onClick={() => navigate("/candidate/profile")} className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-100 transition border border-transparent hover:border-slate-200 cursor-pointer">
             <div className="flex items-center gap-2.5">
               <img
                 className="w-9 h-9 rounded-full object-cover shadow-sm"

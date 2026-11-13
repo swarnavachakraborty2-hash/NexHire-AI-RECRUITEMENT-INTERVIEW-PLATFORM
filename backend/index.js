@@ -11,5 +11,5 @@ connectDB()
     console.log(`Server is running on port ${port}`);
 }))
 .catch((err)=>{
-    console.log("could'nt start the server",  err.message)
+    console.log("connection error: ",  err.message)
 })

@@ -17,7 +17,7 @@
     "url": "https://github.com/swarnavachakraborty2-hash/NexHire-AI-RECRUITEMENT-INTERVIEW-PLATFORM/issues"
   },
   "homepage": "https://github.com/swarnavachakraborty2-hash/NexHire-AI-RECRUITEMENT-INTERVIEW-PLATFORM#readme",
-  "description": "Ai Recruitment Interview Platform",
+  "description": "Ai Recruitment and Interview Platform",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.11.0",
@@ -31,6 +31,7 @@
     "multer": "^2.5.0"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "nodemon": "^3.1.14"
   }
 }

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api, { asyncHandler } from '../api/axios.js'
 import { ClearAccessToken } from '../api/memory.tokenStore.js'
+import NotificationModal from '../components/Notification.modal'
 
 const DEFAULT_AVATAR = 'https://ui-avatars.com/api/?background=f43f5e&color=fff&bold=true&size=128'
 
@@ -87,7 +88,6 @@ export default function RecruiterHome() {
 
   // Recruiter user data
   const [currUser, setCurrUser] = useState()
-  const [companyExists, setCompanyExists] = useState(false)
 
   // Navigation: 'jobs' | 'interviews' | 'profile'
   const [activeTab, setActiveTab] = useState('jobs')
@@ -96,6 +96,10 @@ export default function RecruiterHome() {
   // Recruiter's posted jobs
   const [myJobs, setMyJobs] = useState([])
   const [jobsLoading, setJobsLoading] = useState(true)
+
+  // Notifications state
+  const [notifications, setNotifications] = useState([])
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false)
 
   // Create Interview modal state
   const [createInterviewModal, setCreateInterviewModal] = useState(false)
@@ -143,20 +147,28 @@ export default function RecruiterHome() {
     return () => { isMounted = false }
   }, [])
 
+  // 3. Fetch recruiter notifications
   useEffect(() => {
     let isMounted = true
-    try {
-      asyncHandler(async function () {
-        api.get("/company/my-company")
-        if (res.data.data) {
-          setCompanyExists(true)
-        }
-      })
-    } catch {
-      setCompanyExists(false)
+    const fetchNotifications = async () => {
+      try {
+        await asyncHandler(async () => {
+          const res = await api.get('/notification/all')
+          if (isMounted && res?.data?.data) {
+            const list = (res.data.data || []).filter(
+              (n) => n.type === 'NEW_APPLICATION' || !n.type
+            )
+            setNotifications(list)
+          }
+        })
+      } catch (err) {
+        console.error('Failed to load notifications:', err)
+      }
     }
+    fetchNotifications()
     return () => { isMounted = false }
   }, [])
+
 
   // 3. Logout handler wrapped in asyncHandler
   const handleLogout = async () => {
@@ -274,6 +286,36 @@ export default function RecruiterHome() {
               <span className="text-xs font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-md">
                 {DUMMY_INTERVIEWS.length}
               </span>
+            </div>
+
+            {/* Notifications Tab */}
+            <div
+              onClick={() => {
+                setIsNotificationModalOpen(true)
+                setMobileSidebarOpen(false)
+              }}
+              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer text-slate-600 hover:text-slate-900 hover:bg-[#fdeaea]/60"
+            >
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  {notifications.some((n) => !n.isRead) && (
+                    <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-rose-600 animate-pulse" />
+                  )}
+                </div>
+                <span>Notifications</span>
+              </div>
+              {notifications.length > 0 && (
+                <span className={`px-2 py-0.5 text-xs font-semibold rounded-full border ${
+                  notifications.some((n) => !n.isRead)
+                    ? 'bg-rose-600 text-white border-rose-600'
+                    : 'bg-[#fdeaea] text-rose-600 border-[#f7d6d6]'
+                }`}>
+                  {notifications.filter((n) => !n.isRead).length || notifications.length}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -457,7 +499,7 @@ export default function RecruiterHome() {
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3
-                            onClick={() => navigate(`/recruiter/job/${job._id}`)}
+                            onClick={() => navigate(`/recruiter/jobs/${job._id}`)}
                             className="font-bold text-slate-900 text-sm hover:text-rose-600 cursor-pointer transition"
                           >
                             {job.title}
@@ -482,10 +524,10 @@ export default function RecruiterHome() {
                       </div>
                     </div>
 
-                    {/* Job Actions: Click View to Navigate to /recruiter/job/:id */}
+                    {/* Job Actions: Click View to Navigate to /recruiter/jobs/:id */}
                     <div className="flex items-center gap-2.5 flex-shrink-0">
                       <button
-                        onClick={() => navigate(`/recruiter/job/${job._id}`)}
+                        onClick={() => navigate(`/recruiter/jobs/${job._id}`)}
                         className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-xs"
                       >
                         <span>View</span>
@@ -704,6 +746,14 @@ export default function RecruiterHome() {
           </div>
         </div>
       )}
+
+      {/* ── Recruiter Notification Modal ────────────────────────────────────────── */}
+      <NotificationModal
+        isOpen={isNotificationModalOpen}
+        onClose={() => setIsNotificationModalOpen(false)}
+        notifications={notifications}
+        setNotifications={setNotifications}
+      />
     </div>
   )
 }

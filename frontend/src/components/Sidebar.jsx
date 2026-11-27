@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import api from "../api/axios.js"
 import { asyncHandler } from "../api/axios.js"
 import { ClearAccessToken } from "../api/memory.tokenStore.js"
+import NotificationModal from "./Notification.modal"
 
 const DEFAULT_AVATAR = 'https://ui-avatars.com/api/?background=f43f5e&color=fff&bold=true&size=128';
 
@@ -19,6 +20,8 @@ export default function Sidebar() {
       : "feed";
 
   const [user, setUser] = useState({})
+  const [notifications, setNotifications] = useState([])
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false)
 
   useEffect(() => {
     asyncHandler(async () => {
@@ -29,7 +32,7 @@ export default function Sidebar() {
     })
   }, [])
 
-   const fetchApplications = async () => {
+  const fetchApplications = async () => {
     try {
       await asyncHandler(async () => {
         const res = await api.get('/job/user-applications');
@@ -43,11 +46,7 @@ export default function Sidebar() {
   };
 
   useEffect(() => {
-    let isMounted = true;
     fetchApplications();
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   const handleLogout = async () => {
@@ -61,6 +60,30 @@ export default function Sidebar() {
         console.log(err.response.message || "could'nt log out")
       })
   }
+
+
+  useEffect(() => {
+    let isMounted = true
+    try {
+      asyncHandler(async function () {
+        const res = await api.get("/notification/all")
+        if (isMounted && res?.data?.data) {
+          const list = (res.data.data || []).filter(
+            (n) => n.type === 'JOB_APPLICATION' || !n.type
+          )
+          setNotifications(list)
+        }
+      })
+    } catch (error) {
+      console.log(error?.response?.data?.message || error?.message)
+    }
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+
+
 
   return (
     <div className="flex min-h-screen bg-[#fdeaea]">
@@ -139,6 +162,33 @@ export default function Sidebar() {
                 <span>AI Interviews</span>
               </div>
             </div>
+
+            {/* Notifications Link */}
+            <div
+              onClick={() => setIsNotificationModalOpen(true)}
+              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer text-slate-600 hover:text-slate-900 hover:bg-[#fdeaea]/60"
+            >
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  {notifications.some((n) => !n.isRead) && (
+                    <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-rose-600 animate-pulse" />
+                  )}
+                </div>
+                <span>Notifications</span>
+              </div>
+              {notifications.length > 0 && (
+                <span className={`px-2 py-0.5 text-xs font-semibold rounded-full border ${
+                  notifications.some((n) => !n.isRead)
+                    ? 'bg-rose-600 text-white border-rose-600'
+                    : 'bg-[#fdeaea] text-rose-600 border-[#f7d6d6]'
+                }`}>
+                  {notifications.filter((n) => !n.isRead).length || notifications.length}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -204,6 +254,14 @@ export default function Sidebar() {
       <div className="flex-1 min-w-0">
         <Outlet />
       </div>
+
+      {/* Notification Modal */}
+      <NotificationModal
+        isOpen={isNotificationModalOpen}
+        onClose={() => setIsNotificationModalOpen(false)}
+        notifications={notifications}
+        setNotifications={setNotifications}
+      />
     </div>
   );
 }

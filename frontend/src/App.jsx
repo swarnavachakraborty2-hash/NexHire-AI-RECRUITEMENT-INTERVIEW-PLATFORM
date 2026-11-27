@@ -1,4 +1,3 @@
-import React from 'react'
 import './App.css'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Register from './pages/Register'
@@ -27,6 +26,7 @@ function App() {
         {/* Recruiter Portal */}
         <Route path="/recruiter/home" element={<RecruiterHome />} />
         <Route path="/recruiter/profile" element={<RecruiterProfile />} />
+        <Route path="/recruiter/jobs/:id" element={<RecruiterJob />} />
         <Route path="/recruiter/job/:id" element={<RecruiterJob />} />
 
         {/* Candidate Portal */}

@@ -9,6 +9,8 @@ import mongoose from "mongoose";
 import companyMemberModel from "../models/companyMember.model.js";
 import notificationModel from "../models/notification.model.js"
 import userModel from "../models/user.model.js";
+import companyModel from "../models/company.model.js";
+import sendEmail from "../services/email.service.js";
 
 
 const createJobPost = asyncHandler(async (req, res) => {
@@ -254,6 +256,44 @@ const acceptApplication = asyncHandler(async function (req, res) {
     }
     application.status = "Accepted"
     await application.save()
+
+    const company = await companyModel.findById(application.companyId)
+
+    await notificationModel.create({
+        recipientId: application.candidateId, // The candidate
+        type: "JOB_APPLICATION",
+        title: "Application accepted",
+        message: `you have been shortlisted / accepted as ${foundJob.title} for ${company.name} !!`,
+        actionUrl: `/candidate/job/${foundJob._id}`,
+        isRead: false
+    })
+
+    const user = await userModel.findById(application.candidateId)
+    const recruiter = await userModel.findById(foundJob.postedBy)
+    const emailHtml = `
+      <div style="font-family: sans-serif; max-width: 550px; padding: 24px; border: 1px solid #f7d6d6; border-radius: 12px; background: #ffffff;">
+        <h2 style="color: #e11d48; margin: 0 0 12px;">NexHire &bull; Application Accepted</h2>
+        <p style="color: #334155; font-size: 15px; line-height: 1.5;">
+          Hello <strong>${user?.name || "Candidate"}</strong>,
+        </p>
+        <p style="color: #334155; font-size: 15px; line-height: 1.5;">
+          Your application for <strong>${foundJob.title}</strong> at <strong>${company?.name || "Company"}</strong> has been accepted by <strong>${recruiter?.name || "the Recruiter"}</strong>.
+        </p>
+        <p style="color: #334155; font-size: 15px; line-height: 1.5;">
+          We will soon be conducting the interview. Best of luck!
+        </p>
+        <hr style="border: none; border-top: 1px solid #f7d6d6; margin: 20px 0;" />
+        <p style="font-size: 12px; color: #94a3b8; margin: 0;">NexHire Recruitment Platform</p>
+      </div>
+    `
+    if (user?.email) {
+        sendEmail(
+            user.email,
+            "Job application status",
+            `Your application for ${foundJob.title} at ${company?.name || "Company"} has been accepted by ${recruiter?.name || "the Recruiter"}. We will soon be conducting the interview.`,
+            emailHtml
+        )
+    }
 
     return res.status(200).json(
         new apiResponse(200, "application accepted successfully", application)

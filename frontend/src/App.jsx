@@ -39,7 +39,7 @@ function App() {
         <Route path="/candidate/profile" element={<CandidateProfile />} />
         <Route path="/candidate/job/:id" element={<CandidateJob />} />
         {/* Fallback route */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   )

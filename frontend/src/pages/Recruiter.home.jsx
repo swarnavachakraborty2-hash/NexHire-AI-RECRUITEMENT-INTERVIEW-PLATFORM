@@ -155,9 +155,7 @@ export default function RecruiterHome() {
         await asyncHandler(async () => {
           const res = await api.get('/notification/all')
           if (isMounted && res?.data?.data) {
-            const list = (res.data.data || []).filter(
-              (n) => n.type === 'NEW_APPLICATION' || !n.type
-            )
+            const list = res.data.data
             setNotifications(list)
           }
         })

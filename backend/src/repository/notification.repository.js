@@ -28,9 +28,19 @@ const deleteAllNotification = async (recipientId) => {
     return result;
 };
 
+const readAllNotifications = async (recipientId) => {
+    const result = await notificationModel.updateMany(
+        { recipientId, isRead: false },
+        { $set: { isRead: true } },
+        { runValidators: true }
+    );
+    return result;
+};
+
 export default {
     getAllNotifications,
     readNotification,
+    readAllNotifications,
     deleteNotification,
     deleteAllNotification
 };

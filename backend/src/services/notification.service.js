@@ -20,9 +20,15 @@ const deleteAllNotification = async (recipientId) => {
     return result;
 };
 
+const readAllNotifications = async (recipientId) => {
+    const result = await notificationRepository.readAllNotifications(recipientId);
+    return result;
+};
+
 export default {
     getAllNotifications,
     readNotification,
+    readAllNotifications,
     deleteNotification,
     deleteAllNotification
 };

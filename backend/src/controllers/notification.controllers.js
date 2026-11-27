@@ -72,11 +72,21 @@ const deleteAllNotification = asyncHandler(async function (req, res) {
     );
 });
 
-//read all(params: userId from middleware)
+const readAllNotifications = asyncHandler(async function (req, res) {
+    const recipientId = getRecipientId(req);
+    const result = await notificationService.readAllNotifications(recipientId);
+
+    return res.status(200).json(
+        new apiResponse(200, "Notifications marked as read", {
+            modifiedCount: result.modifiedCount
+        })
+    );
+});
 
 export default {
     getAllNotifications,
     readNotification,
+    readAllNotifications,
     deleteAllNotification,
     deleteNotification
 };

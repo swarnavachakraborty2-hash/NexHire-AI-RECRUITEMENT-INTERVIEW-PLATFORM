@@ -2,17 +2,16 @@ import mongoose from "mongoose";
 
 const interviewSchema = new mongoose.Schema({
     // Practice interviews do not require a company or job.
-    companyId: {
+    companyId: {//optional
         type: mongoose.Schema.Types.ObjectId,
         ref: "Company",
         required: function () { return this.mode === "recruitment"; }
     },
-    jobId: {
+    jobId: {//optional
         type: mongoose.Schema.Types.ObjectId,
         ref: "Job",
         required: function () { return this.mode === "recruitment"; }
     },
-    //null when in practice mode
     candidateId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -59,7 +58,7 @@ const interviewSchema = new mongoose.Schema({
         default: "draft",
         trim: true
     },
-    scheduledAt: {
+    scheduledAt: {//optional
         type: Date
     }
 }, {

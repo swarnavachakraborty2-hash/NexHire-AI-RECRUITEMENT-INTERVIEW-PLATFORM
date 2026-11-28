@@ -19,6 +19,7 @@ import companyRoutes from "./routes/company.routes.js";
 import jobRoutes from "./routes/job.routes.js";
 import candidateRoutes from "./routes/candidate.routes.js"
 import notificationRoutes from "./routes/notification.routes.js"
+import interviewRoutes from "./routes/interview.routes.js"
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/company", companyRoutes);
@@ -26,5 +27,6 @@ app.use("/api/v1/job", jobRoutes);
 app.use("/api/v1/jobs", jobRoutes);
 app.use("/api/v1/candidate", candidateRoutes);
 app.use("/api/v1/notification", notificationRoutes);
+app.use("/api/v1/interview", interviewRoutes);
 
 export default app;

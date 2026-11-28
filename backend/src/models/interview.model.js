@@ -45,17 +45,10 @@ const interviewSchema = new mongoose.Schema({
         type: [String],
         default: []
     },
-    avatarId: {
-        type: String,
-        trim: true
-    },
-    voiceId: {
-        type: String,
-        trim: true
-    },
     status: {
         type: String,
         default: "draft",
+        enum: ["draft", "ready", "inProgress", "finished"],
         trim: true
     },
     scheduledAt: {//optional
